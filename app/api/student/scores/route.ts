@@ -1,0 +1,1 @@
+import {NextResponse} from 'next/server';import {getSession} from '@/lib/auth';import {prisma} from '@/lib/prisma';export async function GET(){const s=await getSession();if(!s)return NextResponse.json({error:'Unauthorized'},{status:401});const x=await prisma.tcasScore.findUnique({where:{studentId:s.studentId}});return NextResponse.json(x)}

@@ -1,0 +1,2 @@
+import {NextResponse} from 'next/server';import {prisma} from '@/lib/prisma';import {setSession} from '@/lib/auth';
+export async function POST(req:Request){const {citizenId,studentCode}=await req.json();const student=await prisma.student.findFirst({where:{citizenId,studentCode}});if(!student)return NextResponse.json({error:'เลขบัตรประชาชนหรือรหัสนักเรียนไม่ถูกต้อง'},{status:401});await setSession(student.id);await prisma.auditLog.create({data:{actor:student.id,action:'LOGIN',details:'Student login'}});return NextResponse.json({ok:true})}

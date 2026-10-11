@@ -1,0 +1,81 @@
+generator client { provider = "prisma-client-js" }
+datasource db { provider = "mysql" url = env("DATABASE_URL") }
+
+enum StudyPlan { SCIENCE_MATH ARTS_MATH ARTS_LANGUAGE GENERAL }
+
+model University {
+  id String @id @default(uuid()) @map("University_id") @db.VarChar(36)
+  abbreviation String @db.VarChar(50)
+  name String @db.VarChar(255)
+  criteria AdmissionCriteria[]
+  @@map("University")
+}
+
+model AdmissionCriteria {
+  id String @id @default(uuid()) @map("Admission_id") @db.VarChar(36)
+  universityId String @map("University_id") @db.VarChar(36)
+  campus String @db.VarChar(100)
+  faculty String @db.VarChar(100)
+  major String @db.VarChar(100)
+  studyPlan StudyPlan
+  minGpax Float
+  minTgat Float @default(0)
+  minTpat1 Float @default(0)
+  minTpat2 Float @default(0)
+  minTpat3 Float @default(0)
+  minTpat4 Float @default(0)
+  minTpat5 Float @default(0)
+  university University @relation(fields: [universityId], references: [id], onDelete: Cascade)
+  @@index([universityId])
+  @@map("Admission_Criteria")
+}
+
+model School {
+  id String @id @default(uuid()) @map("School_id") @db.VarChar(36)
+  schoolCode String @unique @db.VarChar(50)
+  name String @db.VarChar(255)
+  por1TemplateUrl String? @db.Text
+  students Student[]
+  @@map("School")
+}
+
+model Student {
+  id String @id @default(uuid()) @map("Student_id") @db.VarChar(36)
+  schoolId String @map("School_id") @db.VarChar(36)
+  studentCode String @db.VarChar(50)
+  citizenId String @unique @map("citizenID") @db.VarChar(13)
+  fullName String @db.VarChar(255)
+  studyPlan StudyPlan
+  gpax Float
+  gradYear Int
+  pdfPor1Url String? @db.Text
+  createdAt DateTime @default(now())
+  school School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  scores TcasScore?
+  @@unique([schoolId, studentCode])
+  @@map("Student")
+}
+
+model TcasScore {
+  id String @id @default(uuid()) @map("TCASscore_id") @db.VarChar(36)
+  studentId String @unique @map("Student_id") @db.VarChar(36)
+  tgatScore Float @default(0)
+  tpat1Score Float @default(0)
+  tpat2Score Float @default(0)
+  tpat3Score Float @default(0)
+  tpat4Score Float @default(0)
+  tpat5Score Float @default(0)
+  updatedAt DateTime @updatedAt
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  @@map("TCAS_Score")
+}
+
+model AuditLog {
+  id String @id @default(uuid()) @map("AuditLog_id") @db.VarChar(36)
+  actor String @db.VarChar(100)
+  action String @db.VarChar(100)
+  details String @db.Text
+  createdAt DateTime @default(now())
+  @@index([createdAt])
+  @@map("AuditLog")
+}
